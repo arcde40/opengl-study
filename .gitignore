@@ -1,4 +1,4 @@
-/src/build/
+build/
 /src/Libraries/
 /src/glad.c
 .vscode/
