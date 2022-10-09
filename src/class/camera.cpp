@@ -56,13 +56,15 @@ void Camera::Inputs(GLFWwindow *window)
   if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
   {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-
     if (firstClick)
     {
       glfwSetCursorPos(window, (width / 2), (height / 2));
       firstClick = false;
     }
+    locked = true;
+  }
 
+  if(locked){
     double mouseX, mouseY;
     glfwGetCursorPos(window, &mouseX, &mouseY);
     float rotX = sensitivity * (float)(mouseY - (height / 2)) / height;
@@ -79,9 +81,11 @@ void Camera::Inputs(GLFWwindow *window)
 
     glfwSetCursorPos(window, (width / 2), (height / 2));
   }
-  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
+
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
   {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     firstClick = true;
+    locked = false;
   }
 }
