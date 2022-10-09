@@ -2,3 +2,4 @@ build/
 /src/Libraries/
 /src/glad.c
 .vscode/
+/src/stb_image.cpp
