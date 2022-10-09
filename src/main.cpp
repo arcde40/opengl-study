@@ -12,6 +12,7 @@
 #include "class/VBO.h"
 #include "class/EBO.h"
 #include "class/texture.h"
+#include "class/camera.h"
 
 GLfloat vertices[] = {
     -0.5f,
@@ -65,6 +66,8 @@ GLuint indices[] =
         2, 3, 4,
         3, 0, 4};
 
+int width = 800, height = 800;
+
 int main()
 {
 
@@ -75,7 +78,7 @@ int main()
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  GLFWwindow *window = glfwCreateWindow(800, 800, "OpenGL", NULL, NULL);
+  GLFWwindow *window = glfwCreateWindow(width, height, "OpenGL", NULL, NULL);
 
   if (window == NULL)
   {
@@ -123,9 +126,7 @@ int main()
   glClear(GL_COLOR_BUFFER_BIT);
   glfwSwapBuffers(window);
 
-  float rotation = 0.0f;
-  double prevTime = glfwGetTime();
-
+  Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
   glEnable(GL_DEPTH_TEST);
 
   while (!glfwWindowShouldClose(window))
@@ -135,27 +136,8 @@ int main()
 
     shaderProgram.Activate();
 
-    double crntTime = glfwGetTime();
-    if(crntTime - prevTime >= 1/60)
-    {
-      rotation += 0.5f;
-      prevTime = crntTime;
-    }
-
-    glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 view = glm::mat4(1.0f);
-    glm::mat4 proj = glm::mat4(1.0f);
-
-    model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
-    view = glm::translate(view, glm::vec3(0.0f, -0.5f, -2.0f));
-    proj = glm::perspective(glm::radians(45.0f), (float)(pWidth / pHeight), 0.1f, 100.0f);
-
-    int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    int viewLoc = glGetUniformLocation(shaderProgram.ID, "view");
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    int projLoc = glGetUniformLocation(shaderProgram.ID, "proj");
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+    camera.Inputs(window);
+    camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
 
     glUniform1f(uniID, 0.0f);
     popcat.Bind();
