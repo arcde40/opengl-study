@@ -7,14 +7,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "class/shaders.h"
-#include "class/VAO.h"
-#include "class/VBO.h"
-#include "class/EBO.h"
-#include "class/texture.h"
-#include "class/camera.h"
+#include "class/Mesh.h"
 
-GLfloat vertices[] = {
+Vertex vertices[] = {
     /*  -0.5f, 0.0f, 0.5f, 0.83f, 0.70f, 0.44f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,  // Bottom side
       -0.5f, 0.0f, -0.5f, 0.83f, 0.70f, 0.44f, 0.0f, 5.0f, 0.0f, -1.0f, 0.0f, // Bottom side
       0.5f, 0.0f, -0.5f, 0.83f, 0.70f, 0.44f, 5.0f, 5.0f, 0.0f, -1.0f, 0.0f,  // Bottom side
@@ -35,10 +30,10 @@ GLfloat vertices[] = {
       0.5f, 0.0f, 0.5f, 0.83f, 0.70f, 0.44f, 5.0f, 0.0f, 0.0f, 0.5f, 0.8f,  // Facing side
       -0.5f, 0.0f, 0.5f, 0.83f, 0.70f, 0.44f, 0.0f, 0.0f, 0.0f, 0.5f, 0.8f, // Facing side
       0.0f, 0.8f, 0.0f, 0.92f, 0.86f, 0.76f, 2.5f, 5.0f, 0.0f, 0.5f, 0.8f,  // Facing side */
-    -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,  //
-    -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, //
-    1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,  //
-    1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,   //
+    Vertex{glm::vec3(-1.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f)},  //
+    Vertex{glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f)}, //
+    Vertex{glm::vec3(1.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f)},  //
+    Vertex{glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f)},   //
 };
 
 GLuint indices[] =
@@ -52,16 +47,16 @@ GLuint indices[] =
         0, 1, 2,
         0, 2, 3};
 
-GLfloat lightVerticies[] =
+Vertex lightVerticies[] =
     {
-        -0.1f, -0.1f, 0.1f,
-        -0.1f, -0.1f, -0.1f,
-        0.1f, -0.1f, -0.1f,
-        0.1f, -0.1f, 0.1f,
-        -0.1f, 0.1f, 0.1f,
-        -0.1f, 0.1f, -0.1f,
-        0.1f, 0.1f, -0.1f,
-        0.1f, 0.1f, 0.1f};
+        Vertex{glm::vec3(-0.1f, -0.1f, 0.1f)},
+        Vertex{glm::vec3(-0.1f, -0.1f, -0.1f)},
+        Vertex{glm::vec3(0.1f, -0.1f, -0.1f)},
+        Vertex{glm::vec3(0.1f, -0.1f, 0.1f)},
+        Vertex{glm::vec3(-0.1f, 0.1f, 0.1f)},
+        Vertex{glm::vec3(-0.1f, 0.1f, -0.1f)},
+        Vertex{glm::vec3(0.1f, 0.1f, -0.1f)},
+        Vertex{glm::vec3(0.1f, 0.1f, 0.1f)}};
 
 GLuint lightIndicies[] =
     {
@@ -110,35 +105,22 @@ int main()
 
   // Mac (With Retina Display)
 
+  Texture textures[]{
+      Texture("../resources/textures/planks.png", "diffuse", 0, GL_RGBA, GL_UNSIGNED_BYTE),
+      Texture("../resources/textures/planksSpec.png", "specular", 1, GL_RED, GL_UNSIGNED_BYTE)};
+
   Shader shaderProgram("../resources/shaders/vertexShader.vert", "../resources/shaders/fragmentShader.frag");
+  std::vector<Vertex> verts(vertices, vertices + sizeof(vertices) / sizeof(Vertex));
+  std::vector<GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
+  std::vector<Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
 
-  VAO VAO1;
-  VAO1.Bind();
-
-  VBO VBO1(vertices, sizeof(vertices));
-  EBO EBO1(indices, sizeof(indices));
-
-  VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 11 * sizeof(float), (void *)0);
-  VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 11 * sizeof(float), (void *)(3 * sizeof(float)));
-  VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 11 * sizeof(float), (void *)(6 * sizeof(float)));
-  VAO1.LinkAttrib(VBO1, 3, 3, GL_FLOAT, 11 * sizeof(float), (void *)(8 * sizeof(float)));
-
-  VAO1.Unbind();
-  VBO1.Unbind();
-  EBO1.Unbind();
+  Mesh floor(verts, ind, tex);
 
   Shader lightShader("../resources/shaders/light.vert", "../resources/shaders/light.frag");
-  VAO lightVAO;
-  lightVAO.Bind();
 
-  VBO lightVBO(lightVerticies, sizeof(lightVerticies));
-  EBO lightEBO(lightIndicies, sizeof(lightIndicies));
-
-  lightVAO.LinkAttrib(lightVBO, 0, 3, GL_FLOAT, 3 * sizeof(float), (void *)0);
-
-  lightVAO.Unbind();
-  lightVBO.Unbind();
-  lightEBO.Unbind();
+  std::vector<Vertex> lightVerts(lightVerticies, lightVerticies + sizeof(lightVerticies) / sizeof(Vertex));
+  std::vector<GLuint> lightInd(lightIndicies, lightIndicies + sizeof(lightIndicies) / sizeof(GLuint));
+  Mesh light(lightVerts, lightInd, tex);
 
   glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
   glm::vec3 lightPos = glm::vec3(0.5f, 0.5f, 0.5f);
@@ -157,14 +139,6 @@ int main()
   glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
   glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
-  GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");
-
-  Texture popcat("../resources/textures/planks.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
-  popcat.texUnit(shaderProgram, "tex0", 0);
-
-  Texture planksSpec("../resources/textures/planksSpec.png", GL_TEXTURE_2D, 1, GL_RED, GL_UNSIGNED_BYTE);
-  planksSpec.texUnit(shaderProgram, "tex1", 1);
-
   // Double Buffering
   glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -181,30 +155,16 @@ int main()
     camera.Inputs(window);
     camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
-    shaderProgram.Activate();
-    camera.Matrix(shaderProgram, "camMatrix");
-    glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
-    glUniform1f(uniID, 0.0f);
-    popcat.Bind();
-    planksSpec.Bind();
-    VAO1.Bind();
-    glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
-
-    lightShader.Activate();
-    camera.Matrix(lightShader, "camMatrix");
-    lightVAO.Bind();
-    glDrawElements(GL_TRIANGLES, sizeof(lightIndicies) / sizeof(int), GL_UNSIGNED_INT, 0);
+    floor.Draw(shaderProgram, camera);
+    light.Draw(lightShader, camera);
 
     glfwSwapBuffers(window);
 
     glfwPollEvents();
   }
 
-  VAO1.Delete();
-  VBO1.Delete();
-  EBO1.Delete();
   shaderProgram.Delete();
-  popcat.Delete();
+  lightShader.Delete();
 
   glfwDestroyWindow(window);
   glfwTerminate();
