@@ -3,3 +3,4 @@ build/
 /src/glad.c
 .vscode/
 /src/stb_image.cpp
+.DS_Store
