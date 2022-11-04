@@ -1,11 +1,11 @@
 #include "texture.h"
 
-Texture::Texture(const char *image, const char *texType, GLuint slot, GLenum format, GLenum pixelType)
+Texture::Texture(const char *image, const char *texType, GLuint slot)
 {
   // Texture
   type = texType;
   int widthImg, heightImg, numColCh;
-  stbi_set_flip_vertically_on_load(true);
+  //stbi_set_flip_vertically_on_load(true);
   unsigned char *bytes = stbi_load(image, &widthImg, &heightImg, &numColCh, 0);
 
   glGenTextures(1, &ID);
@@ -21,7 +21,21 @@ Texture::Texture(const char *image, const char *texType, GLuint slot, GLenum for
   // float flatColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
   // glTexParameterfv(GL_TEXTURE2D, GL_TEXTURE_BORDER_COLOR, flatColor);
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthImg, heightImg, 0, format, pixelType, bytes);
+  if (numColCh == 4)
+  {
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthImg, heightImg, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytes);
+  }
+  else if (numColCh == 3)
+  {
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthImg, heightImg, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes);
+  }
+  else if (numColCh == 1)
+  {
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthImg, heightImg, 0, GL_RED, GL_UNSIGNED_BYTE, bytes);
+  }
+  else
+    throw std::invalid_argument("Invalid Chahnnel Argument");
+
   glGenerateMipmap(GL_TEXTURE_2D);
 
   stbi_image_free(bytes);
