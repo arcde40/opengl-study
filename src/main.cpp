@@ -61,11 +61,32 @@ int main()
 
   Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
 
-  Model model("../resources/models/grindstone/scene.gltf");
+  Model model("../resources/models/statue/scene.gltf");
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_FRONT);
+  glFrontFace(GL_CW);
+
+  double prevTime = 0.0;
+  double crntTime = 0.0;
+  double timeDiff;
+  unsigned int counter = 0;
 
   while (!glfwWindowShouldClose(window))
   {
+    crntTime = glfwGetTime();
+    timeDiff = crntTime - prevTime;
+    counter++;
+    if(timeDiff > 1.0 / 30.0) {
+      std::string FPS = std::to_string((1.0/timeDiff) * counter);
+      std::string ms = std::to_string((timeDiff/counter) * 1000);
+      std::string newTitle = "OpenGL - " + FPS + "FPS / " + ms + "ms";
+      glfwSetWindowTitle(window, newTitle.c_str());
+      prevTime = crntTime;
+      counter = 0;
+    }
+
+
     glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
