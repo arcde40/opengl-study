@@ -44,7 +44,7 @@ int main()
   // Mac (With Retina Display)
 
   Shader shaderProgram("../resources/shaders/vertexShader.vert", "../resources/shaders/fragmentShader.frag");
-
+  Shader outlineShaderProgram("../resources/shaders/outlining.vert", "../resources/shaders/outlining.frag");
   glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
   glm::vec3 lightPos = glm::vec3(0.5f, 0.5f, 0.5f);
   glm::mat4 lightModel = glm::mat4(1.0f);
@@ -61,22 +61,36 @@ int main()
 
   Camera camera(width, height, glm::vec3(0.0f, 0.5f, 2.0f));
 
-  Model model("../resources/models/ground/scene.gltf");
-  Model model1("../resources/models/trees/scene.gltf");
+  Model model("../resources/models/crow/scene.gltf");
+  Model outline("../resources/models/crow-outline/scene.gltf");
 
   glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
+  glEnable(GL_STENCIL_TEST);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
   while (!glfwWindowShouldClose(window))
   {
-    glClearColor(0.85f, 0.85f, 0.90f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     camera.Inputs(window);
     camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilMask(0xFF);
+
     model.Draw(shaderProgram, camera);
-    model1.Draw(shaderProgram, camera);
+
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilMask(0x00);
+    glDisable(GL_DEPTH_TEST);
+
+    outlineShaderProgram.Activate();
+    outline.Draw(outlineShaderProgram, camera);
+
+    glStencilMask(0xFF);
+    glStencilFunc(GL_ALWAYS, 0, 0xFF);
+    glEnable(GL_DEPTH_TEST);
 
     glfwSwapBuffers(window);
 
