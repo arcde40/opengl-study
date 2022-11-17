@@ -10,6 +10,18 @@
 #include "class/Model.h"
 
 int width = 800, height = 800;
+const unsigned int numWindows = 100;
+glm::vec3 positionsWin[numWindows];
+float rotationsWin[numWindows];
+
+unsigned int orderDraw[numWindows];
+float distanceCamera[numWindows];
+
+int compare(const void *a, const void *b)
+{
+  double diff = distanceCamera[*(int *)b] - distanceCamera[*(int *)a];
+  return (0 < diff) - (diff < 0);
+}
 
 int main()
 {
@@ -44,6 +56,8 @@ int main()
   // Mac (With Retina Display)
 
   Shader shaderProgram("../resources/shaders/vertexShader.vert", "../resources/shaders/fragmentShader.frag");
+  Shader grassShader("../resources/shaders/vertexShader.vert", "../resources/shaders/grassShader.frag");
+  Shader winShader("../resources/shaders/vertexShader.vert", "../resources/shaders/windows.frag");
 
   glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
   glm::vec3 lightPos = glm::vec3(0.5f, 0.5f, 0.5f);
@@ -54,15 +68,37 @@ int main()
   glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
   glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
+  grassShader.Activate();
+  glUniform4f(glGetUniformLocation(grassShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+  glUniform3f(glGetUniformLocation(grassShader.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
+
+  winShader.Activate();
+  glUniform4f(glGetUniformLocation(winShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+  glUniform3f(glGetUniformLocation(winShader.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
   // Double Buffering
   glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
   glfwSwapBuffers(window);
 
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
 
-  Model model("../resources/models/grindstone/scene.gltf");
+  Model grass("../resources/models/grass/scene.gltf");
+  Model ground("../resources/models/ground/scene.gltf");
+  Model windows("../resources/models/windows/scene.gltf");
+
   glEnable(GL_DEPTH_TEST);
+
+  for (unsigned int i = 0; i < numWindows; i++)
+  {
+    positionsWin[i] = glm::vec3(
+        -15.0f + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (15.0f - (-15.0f)))),
+        1.0f + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (4.0f - (1.0f)))),
+        -15.0f + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (15.0f - (-15.0f)))));
+    rotationsWin[i] = static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / 1.0f));
+    orderDraw[i] = i;
+  }
 
   while (!glfwWindowShouldClose(window))
   {
@@ -72,7 +108,23 @@ int main()
     camera.Inputs(window);
     camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
-    model.Draw(shaderProgram, camera);
+    grass.Draw(grassShader, camera);
+    ground.Draw(shaderProgram, camera);
+
+    glEnable(GL_BLEND);
+    for (unsigned int i = 0; i < numWindows; i++)
+    {
+      distanceCamera[i] = glm::length(camera.Position - positionsWin[i]);
+    }
+
+    qsort(orderDraw, numWindows, sizeof(unsigned int), compare);
+
+    for (unsigned int i = 0; i < numWindows; i++)
+    {
+      windows.Draw(winShader, camera, positionsWin[orderDraw[i]], glm::quat(1.0f, 0.0f, rotationsWin[orderDraw[i]], 0.0f));
+    }
+
+    glDisable(GL_BLEND);
 
     glfwSwapBuffers(window);
 
