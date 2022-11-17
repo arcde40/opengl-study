@@ -5,7 +5,7 @@ Texture::Texture(const char *image, const char *texType, GLuint slot)
   // Texture
   type = texType;
   int widthImg, heightImg, numColCh;
-  //stbi_set_flip_vertically_on_load(true);
+  // stbi_set_flip_vertically_on_load(true);
   unsigned char *bytes = stbi_load(image, &widthImg, &heightImg, &numColCh, 0);
 
   glGenTextures(1, &ID);
