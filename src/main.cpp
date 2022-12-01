@@ -43,7 +43,8 @@ int main()
 
   // Mac (With Retina Display)
 
-  Shader shaderProgram("../resources/shaders/vertexShader.vert", "../resources/shaders/fragmentShader.frag");
+  Shader shaderProgram("../resources/shaders/vertexShader.vert", "../resources/shaders/fragmentShader.frag", "../resources/shaders/geometryShader.geom");
+  Shader normalProgram("../resources/shaders/vertexShader.vert", "../resources/shaders/normal.frag", "../resources/shaders/normal.geom");
 
   glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
   glm::vec3 lightPos = glm::vec3(0.5f, 0.5f, 0.5f);
@@ -77,15 +78,15 @@ int main()
     crntTime = glfwGetTime();
     timeDiff = crntTime - prevTime;
     counter++;
-    if(timeDiff > 1.0 / 30.0) {
-      std::string FPS = std::to_string((1.0/timeDiff) * counter);
-      std::string ms = std::to_string((timeDiff/counter) * 1000);
+    if (timeDiff > 1.0 / 30.0)
+    {
+      std::string FPS = std::to_string((1.0 / timeDiff) * counter);
+      std::string ms = std::to_string((timeDiff / counter) * 1000);
       std::string newTitle = "OpenGL - " + FPS + "FPS / " + ms + "ms";
       glfwSetWindowTitle(window, newTitle.c_str());
       prevTime = crntTime;
       counter = 0;
     }
-
 
     glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -94,6 +95,7 @@ int main()
     camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
     model.Draw(shaderProgram, camera);
+    model.Draw(normalProgram, camera);
 
     glfwSwapBuffers(window);
 

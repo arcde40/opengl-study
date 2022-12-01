@@ -20,13 +20,16 @@ std::string loadFile(const char *path)
   return content;
 }
 
-Shader::Shader(const char *vertexFile, const char *fragFile)
+Shader::Shader(const char *vertexFile, const char *fragFile, const char *geometryFile)
 {
   std::string vertShaderContent = loadFile(vertexFile);
   const char *vertShaderSource = vertShaderContent.c_str();
 
   std::string fragShaderContent = loadFile(fragFile);
   const char *fragShaderSource = fragShaderContent.c_str();
+
+  std::string geoShaderContent = loadFile(geometryFile);
+  const char *geoShaderSource = geoShaderContent.c_str();
 
   GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertexShader, 1, &vertShaderSource, NULL);
@@ -36,18 +39,25 @@ Shader::Shader(const char *vertexFile, const char *fragFile)
   GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fragmentShader, 1, &fragShaderSource, NULL);
   glCompileShader(fragmentShader);
-  compileErrors(vertexShader, fragFile);
+  compileErrors(fragmentShader, fragFile);
+
+  GLuint geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+  glShaderSource(geometryShader, 1, &geoShaderSource, NULL);
+  glCompileShader(geometryShader);
+  compileErrors(geometryShader, geometryFile);
 
   ID = glCreateProgram();
 
   glAttachShader(ID, vertexShader);
   glAttachShader(ID, fragmentShader);
+  glAttachShader(ID, geometryShader);
 
   glLinkProgram(ID);
   compileErrors(ID, "PROGRAM");
 
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
+  glDeleteShader(geometryShader);
 }
 
 void Shader::Activate()

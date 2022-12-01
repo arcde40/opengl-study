@@ -13,7 +13,7 @@ class Shader
 {
 public:
   GLuint ID;
-  Shader(const char *vertexFile, const char *fragFile);
+  Shader(const char *vertexFile, const char *fragFile, const char *geometryFile);
 
   void Activate();
   void Delete();
