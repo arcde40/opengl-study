@@ -10,6 +10,7 @@
 #include "class/Model.h"
 
 int width = 800, height = 800;
+unsigned int samples = 8;
 
 int main()
 {
@@ -18,6 +19,7 @@ int main()
   glfwDefaultWindowHints();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_SAMPLES, samples);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
@@ -65,6 +67,7 @@ int main()
   Model model("../resources/models/statue/scene.gltf");
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
+  glEnable(GL_MULTISAMPLE);
   glCullFace(GL_FRONT);
   glFrontFace(GL_CW);
 
